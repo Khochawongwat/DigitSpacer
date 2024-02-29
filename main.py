@@ -1,7 +1,9 @@
 import re
+import os
+import datetime
 
-def format_contents(path):
-    with open(path, "r") as file:
+def format_contents(input_path):
+    with open(input_path, "r") as file:
         start = "begin"
         end = "end"
         data = file.read()
@@ -31,4 +33,33 @@ def format_contents(path):
             start_index = end_pos + len(end)
             last_end_pos = start_index
 
-        return "\t".join(result)
+        output = "\t".join(result)
+
+        dir_path = os.path.dirname(os.path.dirname(input_path))
+
+        out_dir = os.path.join(dir_path, 'out')
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+
+        current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+
+        filename = os.path.basename(input_path)
+
+        output_path = os.path.join(out_dir, f'_{filename}_{current_time}.txt')
+
+        with open(output_path, 'w') as output_file:
+            output_file.write(output)
+
+if __name__ == "__main__":
+    parent_dir = os.path.dirname(os.path.abspath(__file__))
+
+    src_dir = os.path.join(parent_dir, "src")
+
+    count = 0
+    for filename in os.listdir(src_dir):
+        if filename.endswith(".txt"):
+            file_path = os.path.join(src_dir, filename)
+            format_contents(file_path)
+            count += 1
+            
+    print(f"Formatted {count} files")
